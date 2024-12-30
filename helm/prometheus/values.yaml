@@ -1,0 +1,107 @@
+fullnameOverride: ""
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+          storageClassName: longhorn
+  nodeSelector:
+    kubernetes.io/arch: amd64
+global:
+  nodeSelector:
+    kubernetes.io/arch: amd64
+grafana:
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - disableDeletion: false
+        editable: true
+        folder: ""
+        name: default
+        options:
+          path: /var/lib/grafana/dashboards
+        orgId: 1
+        type: file
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - access: proxy
+        isDefault: true
+        name: Prometheus
+        type: prometheus
+        url: http://prometheus-operated:9090
+      - access: proxy
+        isDefault: false
+        name: Loki
+        type: loki
+        url: http://loki:3100
+  ingress:
+    enabled: true
+    hosts:
+    - grafana.kwt.co.kr
+    ingressClassName: nginx
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: longhorn
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 512Mi
+prometheus:
+  prometheusSpec:
+    enableAdminAPI: true
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: kubernetes.io/arch
+              operator: In
+              values:
+              - amd64
+            - key: kubernetes.io/hostname
+              operator: NotIn
+              values:
+              - luckys-worker3  # arm64 노드
+              - luckys-worker6  # DB 전용 노드
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 4Gi
+      requests:
+        cpu: 800m
+        memory: 2Gi
+    retention: 5d # 기본 설정 10d
+    retentionSize: "40GiB"  # 용량 기준
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
+          storageClassName: longhorn
+prometheusOperator:
+  nodeSelector:
+    kubernetes.io/arch: amd64

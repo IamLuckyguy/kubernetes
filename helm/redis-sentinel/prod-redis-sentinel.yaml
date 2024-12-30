@@ -1,0 +1,98 @@
+architecture: replication
+
+auth:
+  enabled: true
+  sentinel: true
+  # Secret에서 비밀번호 가져오기
+  existingSecret: "redis-secret"
+  existingSecretPasswordKey: "redis-password"
+
+sentinel:
+  enabled: true
+  masterSet: mymaster
+  quorum: 2
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: "250m"
+    requests:
+      memory: 128Mi
+      cpu: "100m"
+  # Sentinel pods를 amd64 노드에만 배포
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: NotIn
+            values:
+            - luckys-worker3  # arm64 노드 제외
+
+master:
+  persistence:
+    enabled: false
+  extraFlags:  # 디스크 저장 비활성화
+    - --save ""
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: "500m"
+    requests:
+      memory: 512Mi
+      cpu: "250m"
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  affinity:
+    podAntiAffinity:  # 추가: 마스터와 레플리카가 같은 노드에 배포되지 않도록
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: redis
+        topologyKey: kubernetes.io/hostname
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: NotIn
+            values:
+            - luckys-worker3
+
+replica:
+  replicaCount: 3
+  persistence:
+    enabled: false
+  extraFlags:  # 디스크 저장 비활성화
+    - --save ""
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: "500m"
+    requests:
+      memory: 512Mi
+      cpu: "250m"
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  affinity:
+    # replica pods를 서로 다른 노드에 배포
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/component: replica
+        topologyKey: kubernetes.io/hostname
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: NotIn
+            values:
+            - luckys-worker3
+
+commonConfiguration: |-
+  maxmemory 950mb
+  maxmemory-policy allkeys-lru

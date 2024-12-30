@@ -1,0 +1,71 @@
+global:
+  storageClass: "local-storage"
+
+kraft:
+  enabled: true
+
+replicaCount: 3
+
+resources:
+  requests:
+    memory: "2Gi"
+    cpu: "500m"
+  limits:
+    memory: "4Gi"
+    cpu: "1"
+
+persistence:
+  size: 50Gi
+
+nodeSelector:
+  kubernetes.io/arch: amd64
+
+# 특정 노드에 파드를 고정하기 위한 설정
+# luckys-worker5, luckys-worker2, luckys-worker4 노드에 브로커를 분산 배치
+# luckys-worker1 번 노드 임시 제외
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+          - kafka
+      topologyKey: kubernetes.io/hostname
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - luckys-worker5
+          - luckys-worker2
+          - luckys-worker4
+
+metrics:
+  kafka:
+    enabled: true
+
+serviceAccount:
+  create: true
+
+externalAccess:
+  enabled: true
+  service:
+    type: ClusterIP
+  autoDiscovery:
+    enabled: true
+
+service:
+  type: ClusterIP
+
+rbac:
+  create: true
+
+controller:
+  automountServiceAccountToken: true
+
+broker:
+  automountServiceAccountToken: true

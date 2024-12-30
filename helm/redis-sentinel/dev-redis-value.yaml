@@ -1,0 +1,29 @@
+architecture: standalone
+
+auth:
+  enabled: true
+  # Secret에서 비밀번호 가져오기
+  existingSecret: "redis-secret"
+  existingSecretPasswordKey: "redis-password"
+
+master:
+  nodeSelector:
+    kubernetes.io/hostname: luckys-worker3
+  persistence:
+    enabled: false  # persistence 비활성화
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: "400m"
+    requests:
+      memory: 512Mi
+      cpu: "200m"
+
+replica:
+  replicaCount: 0
+
+commonConfiguration: |-
+  maxmemory 950mb
+  maxmemory-policy allkeys-lru
+  save ""
+  appendonly no

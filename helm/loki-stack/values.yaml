@@ -10,7 +10,7 @@ loki:
       retention_delete_delay: 1h # 기본 설정 2h
       retention_delete_worker_count: 50 # 기본 설정 150
     limits_config:
-      retention_period: 240h # 10일
+      retention_period: 168h # 7일
     storage_config:
       boltdb_shipper:
         active_index_directory: /data/loki/index

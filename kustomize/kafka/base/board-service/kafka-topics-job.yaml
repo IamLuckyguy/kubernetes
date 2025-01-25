@@ -2,15 +2,23 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: create-board-service-kafka-topics
+  namespace: kafka
 spec:
   template:
     spec:
+      securityContext:
+        runAsUser: 0
       containers:
       - name: kafka-topics-creator
         image: bitnami/kafka:latest
         command: ["/bin/sh", "-c"]
         args:
           - |
+            apt-get update && apt-get install -y jq && \
+            PASSWORD=$(cat /opt/bitnami/kafka/secrets/client-passwords/client-passwords) && \
+            echo "security.protocol=SASL_PLAINTEXT
+            sasl.mechanism=PLAIN
+            sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"user1\" password=\"$PASSWORD\";" > /tmp/kafka.properties && \
             for topic in $(jq -c '.topics[]' /config/topics.json); do
               name=$(echo $topic | jq -r '.name')
               partitions=$(echo $topic | jq -r '.partitions')
@@ -20,7 +28,8 @@ spec:
               echo "Creating topic: $name"
               kafka-topics.sh --create \
                 --if-not-exists \
-                --bootstrap-server kafka-headless:9092 \
+                --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
+                --command-config /tmp/kafka.properties \
                 --topic "$name" \
                 --partitions "$partitions" \
                 --replication-factor "$replication" \
@@ -29,8 +38,14 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /config
+        - name: kafka-user-passwords
+          mountPath: /opt/bitnami/kafka/secrets/client-passwords
       volumes:
       - name: config
         configMap:
           name: board-service-kafka-topics
+          defaultMode: 0777
+      - name: kafka-user-passwords
+        secret:
+          secretName: kafka-user-passwords
       restartPolicy: OnFailure

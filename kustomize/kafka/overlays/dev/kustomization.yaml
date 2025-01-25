@@ -1,6 +1,8 @@
-bases:
-- ../../base
 patches:
 - path: board-service-patch.yaml
-- path: member-service-patch.yaml
-- path: message-service-patch.yaml
+  #- path: member-service-patch.yaml
+  #- path: message-service-patch.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../base

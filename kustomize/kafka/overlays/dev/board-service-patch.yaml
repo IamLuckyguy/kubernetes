@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: board-service-kafka-topics
+  namespace: kafka
 data:
   topics.json: |
     {

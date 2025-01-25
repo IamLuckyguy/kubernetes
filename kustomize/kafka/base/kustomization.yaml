@@ -1,0 +1,7 @@
+resources:
+- board-service/kafka-topics-configmap.yaml
+- board-service/kafka-topics-job.yaml
+- member-service/kafka-topics-configmap.yaml
+- member-service/kafka-topics-job.yaml
+- message-service/kafka-topics-configmap.yaml
+- message-service/kafka-topics-job.yaml

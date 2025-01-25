@@ -1,0 +1,6 @@
+bases:
+- ../../base
+patches:
+- path: board-service-patch.yaml
+- path: member-service-patch.yaml
+- path: message-service-patch.yaml

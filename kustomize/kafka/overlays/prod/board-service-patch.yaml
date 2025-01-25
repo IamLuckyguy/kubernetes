@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: board-service-kafka-topics
+  labels:
+    environment: production
+data:
+  topics.json: |
+    {
+      "topics": [
+        {
+          "name": "prod.board-service.post.created",
+          "partitions": 3,
+          "replicationFactor": 3,
+          "configs": {
+            "retention.ms": "604800000",
+            "cleanup.policy": "delete"
+          }
+        },
+        {
+          "name": "prod.board-service.post.updated",
+          "partitions": 3,
+          "replicationFactor": 3,
+          "configs": {
+            "retention.ms": "604800000",
+            "cleanup.policy": "delete"
+          }
+        },
+        {
+          "name": "prod.board-service.post.deleted",
+          "partitions": 3,
+          "replicationFactor": 3,
+          "configs": {
+            "retention.ms": "604800000",
+            "cleanup.policy": "delete"
+          }
+        },
+        {
+          "name": "prod.board-service.comment.created",
+          "partitions": 3,
+          "replicationFactor": 3,
+          "configs": {
+            "retention.ms": "604800000",
+            "cleanup.policy": "delete"
+          }
+        },
+        {
+          "name": "prod.board-service.like.added",
+          "partitions": 3,
+          "replicationFactor": 3,
+          "configs": {
+            "retention.ms": "604800000",
+            "cleanup.policy": "delete"
+          }
+        }
+      ]
+    }

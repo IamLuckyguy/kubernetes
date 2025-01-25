@@ -10,45 +10,45 @@ data:
         {
           "name": "dev.board-service.post.created",
           "partitions": 3,
-          "replicationFactor": 3,
+          "replicationFactor": 2,
           "configs": {
-            "retention.ms": "604800000",
+            "retention.ms": "86400000",
             "cleanup.policy": "delete"
           }
         },
         {
           "name": "dev.board-service.post.updated",
           "partitions": 3,
-          "replicationFactor": 3,
+          "replicationFactor": 2,
           "configs": {
-            "retention.ms": "604800000",
+            "retention.ms": "86400000",
             "cleanup.policy": "delete"
           }
         },
         {
           "name": "dev.board-service.post.deleted",
           "partitions": 3,
-          "replicationFactor": 3,
+          "replicationFactor": 2,
           "configs": {
-            "retention.ms": "604800000",
+            "retention.ms": "86400000",
             "cleanup.policy": "delete"
           }
         },
         {
           "name": "dev.board-service.comment.created",
           "partitions": 3,
-          "replicationFactor": 3,
+          "replicationFactor": 2,
           "configs": {
-            "retention.ms": "604800000",
+            "retention.ms": "86400000",
             "cleanup.policy": "delete"
           }
         },
         {
           "name": "dev.board-service.like.added",
           "partitions": 3,
-          "replicationFactor": 3,
+          "replicationFactor": 2,
           "configs": {
-            "retention.ms": "604800000",
+            "retention.ms": "86400000",
             "cleanup.policy": "delete"
           }
         }

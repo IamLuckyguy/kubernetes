@@ -23,17 +23,29 @@ spec:
               name=$(echo $topic | jq -r '.name')
               partitions=$(echo $topic | jq -r '.partitions')
               replication=$(echo $topic | jq -r '.replicationFactor')
-              configs=$(echo $topic | jq -r '.configs | to_entries | map("--config \(.key)=\(.value)") | join(" ")')
-              
-              echo "Creating topic: $name"
-              kafka-topics.sh --create \
-                --if-not-exists \
-                --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
-                --command-config /tmp/kafka.properties \
-                --topic "$name" \
-                --partitions "$partitions" \
-                --replication-factor "$replication" \
-                $configs
+              retention_ms=$(echo $topic | jq -r '.configs."retention.ms"')
+              cleanup_policy=$(echo $topic | jq -r '.configs."cleanup.policy"')
+
+              if kafka-topics.sh --list --bootstrap-server kafka.kafka.svc.cluster.local:9092 --command-config /tmp/kafka.properties | grep -q "^$name$"; then
+                echo "Updating existing topic: $name"
+                # 설정 변경
+                kafka-configs.sh --alter \
+                  --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
+                  --command-config /tmp/kafka.properties \
+                  --topic "$name" \
+                  --add-config "retention.ms=$retention_ms,cleanup.policy=$cleanup_policy"
+              else
+                echo "Creating new topic: $name"
+                # 새 토픽 생성
+                kafka-topics.sh --create \
+                  --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
+                  --command-config /tmp/kafka.properties \
+                  --topic "$name" \
+                  --partitions "$partitions" \
+                  --replication-factor "$replication" \
+                  --config "retention.ms=$retention_ms" \
+                  --config "cleanup.policy=$cleanup_policy"
+              fi
             done
         volumeMounts:
         - name: config

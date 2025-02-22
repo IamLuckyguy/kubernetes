@@ -34,7 +34,7 @@ service:
   externalTrafficPolicy: Cluster
 
 nodeSelector:
-  kubernetes.io/hostname: luckys-worker2
+  kubernetes.io/hostname: luckys-worker1
   kubernetes.io/arch: amd64
 
 metrics:
